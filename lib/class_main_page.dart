@@ -20,17 +20,18 @@ class ClassMainPage extends StatefulWidget {
 }
 
 class _ClassMainPageState extends State<ClassMainPage> {
-  // ignore: unused_field
+  // ignore: unused_field　(f_focusedDay)
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   final PanelController _panelController = PanelController();
   bool _isVisible = true;
-  final List<Todo> _todoList = []; // Todoリスト（ウィジェット）
+  final List<Todo> _todoList = []; // Todoリスト
   final List<String> todoIdList = []; // タスクIDリスト
 
   @override
   void initState() {
     super.initState();
+    // 起動時にTodoListを読み込む
     loadTodo();
   }
 
@@ -67,6 +68,7 @@ class _ClassMainPageState extends State<ClassMainPage> {
 
     print('todoListを保存しました. todoList: $todoListJson');
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +177,7 @@ class _ClassMainPageState extends State<ClassMainPage> {
             height: MediaQuery.of(context).size.height * 0.33,
             width: MediaQuery.of(context).size.width * 0.95,
             child: TableCalendar(
-              // カレンダーの上の部分のスタイルを変えるためのやつ
+              // カレンダーの上の部分のスタイルを変えるための設定
               headerStyle: const HeaderStyle(
                 formatButtonVisible: false,
                 titleCentered: true, //この行を追加
@@ -202,6 +204,7 @@ class _ClassMainPageState extends State<ClassMainPage> {
             child: ListView.builder(
               itemCount: _todoList.length,
               itemBuilder: (BuildContext context, int index) {
+                // [!未実装]TodoTaskTileのフィールドにコールバック関数を追加して、タスクが完了した場合に呼び出すように設定する
                 return TodoTaskTile(todo: _todoList[index]);
               },
             ),

@@ -1,10 +1,6 @@
 // スライドアップパネルで表示するウィジェット
-
-import 'dart:convert';
-
 import 'package:board_datetime_picker/board_datetime_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:todo_timetable/todo.dart';
 import 'package:uuid/uuid.dart';
@@ -13,13 +9,11 @@ class AddingTodoPage extends StatefulWidget {
   const AddingTodoPage({
     super.key,
     required this.panelController,
-    // required this.todoList,
     required this.className,
     required this.todoIdList,
     required this.todoWasAdded,
   });
   final PanelController panelController;
-  // final List<Todo> todoList;
   final String className;
   final List<String> todoIdList;
   final Function(Todo) todoWasAdded;
@@ -199,7 +193,7 @@ class AddingTodoPageState extends State<AddingTodoPage> {
                         widget.panelController.close();
                         FocusScope.of(context).unfocus();
 
-                        // IDを生成
+                        // Todoインスタンス用のIDを生成
                         const uuid = Uuid();
                         var newId = uuid.v4();
                         // IDに被りがなくなるまで、ループ
@@ -210,8 +204,7 @@ class AddingTodoPageState extends State<AddingTodoPage> {
                         // IDを追加
                         widget.todoIdList.add(newId);
 
-                        // TodoTaskTileを追加
-                        // ここをコールバックにする...Todoを返す
+                        // Todoのインスタンスを作成し、コールバック関数の引数としてclassMainPageに渡す
                         Todo newTodo = Todo(
                           isDone: false,
                           content: _todoContent,
@@ -219,11 +212,8 @@ class AddingTodoPageState extends State<AddingTodoPage> {
                           id: newId,
                         );
                         widget.todoWasAdded(newTodo);
-                        // widget.todoList.add(newTodo);
 
-                        // TodoListをローカルに保存
-                        // saveTodo();
-
+                        // デバッグ用
                         print('todo: $_todoContent');
                         print('deadline: $_deadline');
 
@@ -276,63 +266,4 @@ class AddingTodoPageState extends State<AddingTodoPage> {
     );
   }
 
-//   // TodoListをローカルに保存するメソッド
-  // Future saveTodo() async {
-  //   // TodoListをjson形式のリストに変換
-  //   List<String> todoListJson = widget.todoList.map((todo) {
-  //     return json.encode(todo.toJson());
-  //   }).toList();
-
-  //   // SharedPreferencesに保存
-  //   final prefs = await SharedPreferences.getInstance();
-  //   prefs.setStringList(
-  //       '${widget.className}_todoList', todoListJson); // todoListを保存
-
-  //   print('todoListを保存しました. todoList: $todoListJson');
-  // }
-
-// // TodoListをローカルから読み込むメソッド
-  Future<List<Todo>> loadTodo() async {
-    final prefs = await SharedPreferences.getInstance();
-    final todoListJson =
-        prefs.getStringList('${widget.className}_todoList') ?? [];
-
-    // json形式のリストをTodoListに変換
-    List<Todo> todoList = todoListJson.map((todoJson) {
-      return Todo.fromJson(json.decode(todoJson));
-    }).toList();
-
-    print('todoListを読み込みました. todoList: $todoList');
-
-    return todoList;
-  }
-
-//   Future saveTodo({required Todo todo, required String className}) async {
-//     final directory = await getApplicationCacheDirectory();
-//     final path = '${directory.path}/${className}_todo.json';
-//     final file = File(path);
-//     print('出力パス = $path');
-
-// // String型に変換して保存
-//     final jsonString = json.encode(todo.toJson());
-//     file.writeAsStringSync(jsonString);
-//     print('書き込み内容 = $jsonString');
-//   }
-
-// // TodoListをローカルから読み込むメソッド
-//   Future<List<Todo>> loadTodoList(
-//       {required Todo todo, required String className}) async {
-//     final directory = await getApplicationCacheDirectory();
-//     final path = '${directory.path}/${className}_todo.json';
-//     final file = File(path);
-//     print('読み込みパス = $path');
-
-//     final jsonString = file.readAsStringSync();
-//     print('読み込み内容 = $jsonString');
-
-//     final todo = Todo.fromJson(json.decode(jsonString));
-//     print('読み込み内容 = $todo');
-
-//     return [todo];
-//   }
 }
