@@ -1,7 +1,10 @@
 // スライドアップパネルで表示するウィジェット
 
+import 'dart:convert';
+
 import 'package:board_datetime_picker/board_datetime_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:todo_timetable/todo.dart';
 import 'package:uuid/uuid.dart';
@@ -10,14 +13,16 @@ class AddingTodoPage extends StatefulWidget {
   const AddingTodoPage({
     super.key,
     required this.panelController,
-    required this.todoList,
+    // required this.todoList,
     required this.className,
     required this.todoIdList,
+    required this.todoWasAdded,
   });
   final PanelController panelController;
-  final List<Todo> todoList;
+  // final List<Todo> todoList;
   final String className;
   final List<String> todoIdList;
+  final Function(Todo) todoWasAdded;
 
   @override
   AddingTodoPageState createState() => AddingTodoPageState();
@@ -27,6 +32,7 @@ class AddingTodoPageState extends State<AddingTodoPage> {
   /* 入力する期限、内容をstateで保存 */
   DateTime _deadline = DateTime.now();
   String _todoContent = "";
+
 
   final Map<String, bool> _buttonIsActiveFlags = {
     'pickupButton': false,
@@ -38,17 +44,6 @@ class AddingTodoPageState extends State<AddingTodoPage> {
 
   final TextEditingController _textEditingController = TextEditingController();
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    // ローカルからTodoListを読み込む
-    // loadTodo().then((loadedTodoList) {
-    //   setState(() {
-    //     todoList = loadedTodoList;
-    //   });
-    // });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +52,7 @@ class AddingTodoPageState extends State<AddingTodoPage> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque, //画面外タップを検知するために必要
         onTap: () {
-          // FocusScope.of(context).unfocus();
+          FocusScope.of(context).unfocus();
         },
         child: Column(
           children: [
@@ -216,13 +211,15 @@ class AddingTodoPageState extends State<AddingTodoPage> {
                         widget.todoIdList.add(newId);
 
                         // TodoTaskTileを追加
+                        // ここをコールバックにする...Todoを返す
                         Todo newTodo = Todo(
                           isDone: false,
                           content: _todoContent,
                           deadline: _deadline,
                           id: newId,
                         );
-                        widget.todoList.add(newTodo);
+                        widget.todoWasAdded(newTodo);
+                        // widget.todoList.add(newTodo);
 
                         // TodoListをローカルに保存
                         // saveTodo();
@@ -280,35 +277,35 @@ class AddingTodoPageState extends State<AddingTodoPage> {
   }
 
 //   // TodoListをローカルに保存するメソッド
-//   Future saveTodo() async {
-//     // TodoListをjson形式のリストに変換
-//     List<String> todoListJson = todoList.map((todo) {
-//       return json.encode(todo.toJson());
-//     }).toList();
+  // Future saveTodo() async {
+  //   // TodoListをjson形式のリストに変換
+  //   List<String> todoListJson = widget.todoList.map((todo) {
+  //     return json.encode(todo.toJson());
+  //   }).toList();
 
-//     // SharedPreferencesに保存
-//     final prefs = await SharedPreferences.getInstance();
-//     prefs.setStringList(
-//         '${widget.className}_todoList', todoListJson); // todoListを保存
+  //   // SharedPreferencesに保存
+  //   final prefs = await SharedPreferences.getInstance();
+  //   prefs.setStringList(
+  //       '${widget.className}_todoList', todoListJson); // todoListを保存
 
-//     print('todoListを保存しました. todoList: $todoListJson');
-//   }
+  //   print('todoListを保存しました. todoList: $todoListJson');
+  // }
 
 // // TodoListをローカルから読み込むメソッド
-//   Future<List<Todo>> loadTodo() async {
-//     final prefs = await SharedPreferences.getInstance();
-//     final todoListJson =
-//         prefs.getStringList('${widget.className}_todoList') ?? [];
+  Future<List<Todo>> loadTodo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final todoListJson =
+        prefs.getStringList('${widget.className}_todoList') ?? [];
 
-//     // json形式のリストをTodoListに変換
-//     List<Todo> todoList = todoListJson.map((todoJson) {
-//       return Todo.fromJson(json.decode(todoJson));
-//     }).toList();
+    // json形式のリストをTodoListに変換
+    List<Todo> todoList = todoListJson.map((todoJson) {
+      return Todo.fromJson(json.decode(todoJson));
+    }).toList();
 
-//     print('todoListを読み込みました. todoList: $todoList');
+    print('todoListを読み込みました. todoList: $todoList');
 
-//     return todoList;
-//   }
+    return todoList;
+  }
 
 //   Future saveTodo({required Todo todo, required String className}) async {
 //     final directory = await getApplicationCacheDirectory();

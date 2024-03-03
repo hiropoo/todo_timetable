@@ -1,6 +1,9 @@
 // ignore_for_file: avoid_print
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:todo_timetable/adding_todo_page.dart';
@@ -9,10 +12,8 @@ import 'package:todo_timetable/todo_task_tile.dart';
 
 class ClassMainPage extends StatefulWidget {
   final String className; // 授業名
-  final List<String> todoIdList = []; // タスクIDリスト
 
-  ClassMainPage({super.key, required this.className});
-  final List<Todo> _todoList = []; // Todoリスト（ウィジェット）
+  const ClassMainPage({super.key, required this.className});
 
   @override
   State<ClassMainPage> createState() => _ClassMainPageState();
@@ -24,6 +25,48 @@ class _ClassMainPageState extends State<ClassMainPage> {
   DateTime? _selectedDay;
   final PanelController _panelController = PanelController();
   bool _isVisible = true;
+  final List<Todo> _todoList = []; // Todoリスト（ウィジェット）
+  final List<String> todoIdList = []; // タスクIDリスト
+
+  @override
+  void initState() {
+    super.initState();
+    loadTodo();
+  }
+
+  // SharedPreferencesからTodoListを読み込むメソッド
+  Future loadTodo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final todoListJson =
+        prefs.getStringList('${widget.className}_todoList') ?? [];
+
+    // json形式のリストをTodoListに変換
+    List<Todo> todoList = todoListJson.map((todoJson) {
+      return Todo.fromJson(json.decode(todoJson));
+    }).toList();
+
+    print('todoListを読み込みました. todoList: $todoList');
+
+    // Todoリストを更新
+    setState(() {
+      _todoList.addAll(todoList);
+    });
+  }
+
+  // SharedPreferencesに更新されたTodoListを保存するメソッド
+  Future saveTodo() async {
+    // TodoListをjson形式のリストに変換
+    List<String> todoListJson = _todoList.map((todo) {
+      return json.encode(todo.toJson());
+    }).toList();
+
+    // SharedPreferencesに保存
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList(
+        '${widget.className}_todoList', todoListJson); // todoListを保存
+
+    print('todoListを保存しました. todoList: $todoListJson');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +111,16 @@ class _ClassMainPageState extends State<ClassMainPage> {
         },
         body: _body(_panelController),
         panel: AddingTodoPage(
-          panelController: _panelController, 
-          todoList: widget._todoList,
-          className: widget.className, 
-          todoIdList: widget.todoIdList,
+          panelController: _panelController,
+          className: widget.className,
+          todoIdList: todoIdList,
+
+          // addingTodoPageからTodoが追加された場合の処理
+          todoWasAdded: (todo) async{
+            // Todoリストに追加してローカルに保存
+            _todoList.add(todo);
+            await saveTodo();
+          },
         ),
       ),
       floatingActionButton: Visibility(
@@ -151,9 +200,9 @@ class _ClassMainPageState extends State<ClassMainPage> {
           // 追加された課題を表示する部分
           Expanded(
             child: ListView.builder(
-              itemCount: widget._todoList.length,
+              itemCount: _todoList.length,
               itemBuilder: (BuildContext context, int index) {
-                return TodoTaskTile(todo: widget._todoList[index]);
+                return TodoTaskTile(todo: _todoList[index]);
               },
             ),
           ),

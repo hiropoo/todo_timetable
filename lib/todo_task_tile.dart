@@ -4,12 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:todo_timetable/todo.dart';
 
 class TodoTaskTile extends StatefulWidget {
-  TodoTaskTile(
-      {super.key, required this.todo}) {
-    print("コンストラクタだよー");
-    // データベースにタスクを追加
-    // addTodoTask(task, deadline, false);
-  }
+  const TodoTaskTile({super.key, required this.todo});
 
   final Todo todo;
 
