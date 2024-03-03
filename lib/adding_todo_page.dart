@@ -16,7 +16,7 @@ class AddingTodoPage extends StatefulWidget {
   final PanelController panelController;
   final String className;
   final List<String> todoIdList;
-  final Function(Todo) todoWasAdded;
+  final Function(Todo) todoWasAdded;  // Todoが追加されたときのコールバック関数
 
   @override
   AddingTodoPageState createState() => AddingTodoPageState();

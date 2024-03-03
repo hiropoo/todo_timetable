@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -20,7 +21,7 @@ class ClassMainPage extends StatefulWidget {
 }
 
 class _ClassMainPageState extends State<ClassMainPage> {
-  // ignore: unused_field　(f_focusedDay)
+  // ignore: unused_field
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   final PanelController _panelController = PanelController();
@@ -68,7 +69,6 @@ class _ClassMainPageState extends State<ClassMainPage> {
 
     print('todoListを保存しました. todoList: $todoListJson');
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +118,7 @@ class _ClassMainPageState extends State<ClassMainPage> {
           todoIdList: todoIdList,
 
           // addingTodoPageからTodoが追加された場合の処理
-          todoWasAdded: (todo) async{
+          todoWasAdded: (todo) async {
             // Todoリストに追加してローカルに保存
             _todoList.add(todo);
             await saveTodo();
@@ -201,12 +201,31 @@ class _ClassMainPageState extends State<ClassMainPage> {
 
           // 追加された課題を表示する部分
           Expanded(
-            child: ListView.builder(
-              itemCount: _todoList.length,
-              itemBuilder: (BuildContext context, int index) {
-                // [!未実装]TodoTaskTileのフィールドにコールバック関数を追加して、タスクが完了した場合に呼び出すように設定する
-                return TodoTaskTile(todo: _todoList[index]);
-              },
+            child: SlidableAutoCloseBehavior(
+              closeWhenOpened: true, // 他がスライドされたら自動で閉じる
+              child: ListView.builder(
+                itemCount: _todoList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  // [!未実装]TodoTaskTileのフィールドにコールバック関数を追加して、タスクが完了した場合に呼び出すように設定する
+                  return TodoTaskTile(
+                    todo: _todoList[index],
+                    // Todoの削除を実装
+                    todoWasDeleted: (todo) {
+                      _todoList.remove(todo);
+                      saveTodo();
+                      setState(() {}); // 再描画
+                    },
+
+                    // Todoのタスクのチェックボックスが変更された場合の処理
+                    todoWasTapped: (todo) {
+                      // Todoリストの該当するTodoのisDoneを更新
+                      _todoList[_todoList.indexOf(todo)].isDone = !todo.isDone;
+                      saveTodo();
+                      setState(() {}); // 再描画
+                    },
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 200),
