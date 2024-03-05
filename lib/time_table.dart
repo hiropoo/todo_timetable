@@ -10,9 +10,9 @@ class TimeTable extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: const Center(
-            child: Text(
-              '週時間割'
-              ),
+            child: Text('週時間割',
+                style: TextStyle(
+                    fontWeight: FontWeight.w600, color: Color(0xFF666666))),
           ),
         ),
         body: Container(

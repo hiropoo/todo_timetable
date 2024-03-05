@@ -29,11 +29,17 @@ class _ClassMainPageState extends State<ClassMainPage> {
   final List<Todo> _todoList = []; // Todoリスト
   final List<String> todoIdList = []; // タスクIDリスト
 
+  Map<DateTime?, List<String>> todoEvents = {}; // カレンダーのイベント(TodoのIDを保存)
+
   @override
   void initState() {
     super.initState();
     // 起動時にTodoListを読み込む
-    loadTodo();
+    // todoEventsを更新する際に_todoListが必要なため、
+    // loadTodo()の後にloadTodoEvents()を呼び出す
+    loadTodo().then((value) {
+      loadTodoEvents();
+    });
   }
 
   // SharedPreferencesからTodoListを読み込むメソッド
@@ -47,12 +53,28 @@ class _ClassMainPageState extends State<ClassMainPage> {
       return Todo.fromJson(json.decode(todoJson));
     }).toList();
 
-    print('todoListを読み込みました. todoList: $todoList');
-
     // Todoリストを更新
     setState(() {
       _todoList.addAll(todoList);
     });
+  }
+
+  // TodoListからTodoのイベントを読み込むメソッド
+  void loadTodoEvents() {
+    for (Todo todo in _todoList) {
+      DateTime? utcDate = todo.deadline.toUtc();
+      int utcYear = utcDate.year;
+      int utcMonth = utcDate.month;
+      int utcDay = utcDate.day;
+      utcDate = DateTime.utc(utcYear, utcMonth, utcDay);
+
+      if (todoEvents[utcDate] == null) {
+        todoEvents[utcDate] = [todo.id];
+      } else {
+        todoEvents[utcDate]?.add(todo.id);
+      }
+    }
+    print('todoEvents: $todoEvents'); // デバッグ用
   }
 
   // SharedPreferencesに更新されたTodoListを保存するメソッド
@@ -67,7 +89,21 @@ class _ClassMainPageState extends State<ClassMainPage> {
     prefs.setStringList(
         '${widget.className}_todoList', todoListJson); // todoListを保存
 
+    setState(() {}); // 画面を更新
     print('todoListを保存しました. todoList: $todoListJson');
+  }
+
+  // カレンダーの日付のテキストカラーを変えるメソッド(土: 青, 日: 赤, 他: 黒)
+  Color _textColor(DateTime day) {
+    const defaultTextColor = Colors.black87;
+
+    if (day.weekday == DateTime.sunday) {
+      return Colors.red;
+    }
+    if (day.weekday == DateTime.saturday) {
+      return Colors.blue[600]!;
+    }
+    return defaultTextColor;
   }
 
   @override
@@ -75,10 +111,12 @@ class _ClassMainPageState extends State<ClassMainPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Todo'),
+        title: const Text('Todo',
+            style: TextStyle(
+                fontWeight: FontWeight.w600, color: Color(0xFF666666))),
         actions: [
           Container(
-              margin: const EdgeInsets.only(right: 20, bottom: 10),
+              margin: const EdgeInsets.only(right: 20),
               child: IconButton(
                   onPressed: () {
                     print("todo画面のメニューボタンが押されました");
@@ -122,6 +160,21 @@ class _ClassMainPageState extends State<ClassMainPage> {
             // Todoリストに追加してローカルに保存
             _todoList.add(todo);
             await saveTodo();
+
+            setState(() {
+              // カレンダーのイベントに追加
+              // Map todoEventsのkeyはDateTime.Utc()でない実装できないため変換を行っている(toUTC()では実装不可)
+              DateTime utcDate = todo.deadline.toUtc();
+              int utcYear = utcDate.year;
+              int utcMonth = utcDate.month;
+              int utcDay = utcDate.day;
+              utcDate = DateTime.utc(utcYear, utcMonth, utcDay);
+              if (todoEvents[utcDate] == null) {
+                todoEvents[utcDate] = [todo.content];
+              } else {
+                todoEvents[utcDate]?.add(todo.content);
+              }
+            });
           },
         ),
       ),
@@ -177,11 +230,70 @@ class _ClassMainPageState extends State<ClassMainPage> {
             height: MediaQuery.of(context).size.height * 0.33,
             width: MediaQuery.of(context).size.width * 0.95,
             child: TableCalendar(
+              // カレンダーのスタイルを変えるための設定(日付の色の変更)
+              calendarBuilders: CalendarBuilders(defaultBuilder:
+                  (BuildContext context, DateTime day, DateTime focusedDay) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 100),
+                  margin: EdgeInsets.zero,
+                  alignment: Alignment.center,
+                  child: Text(
+                    day.day.toString(),
+                    style: TextStyle(
+                      color: _textColor(day),
+                    ),
+                  ),
+                );
+              }, markerBuilder:
+                  (BuildContext context, DateTime day, List todoIds) {
+                List<Widget> markers = [];
+                // Todoが完了(チェックボックスにチェックが入っている場合)の場合とそれ以外の場合でマーカーを変える
+                for (var todoId in todoIds) {
+                  // 該当のTodoが_todoList内に存在する場合にのみ処理を実行
+                  int index = _todoList.indexWhere((todo) => todo.id == todoId);
+                  if (index != -1) {
+                    if (_todoList[index].isDone) {
+                      markers.add(Text(
+                        '●',
+                        style: TextStyle(
+                          fontSize: 7,
+                          color: Colors.grey[350],
+                        ),
+                      ));
+                    } else {
+                      markers.add(const Text(
+                        '●',
+                        style: TextStyle(
+                          fontSize: 7,
+                          color: Color(0xFFB7E6A6),
+                        ),
+                      ));
+                    }
+                  }
+                  
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.only(top: 25),
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    children: markers,
+                  ),
+                );
+
+              }),
+              startingDayOfWeek: StartingDayOfWeek.sunday,
               // カレンダーの上の部分のスタイルを変えるための設定
               headerStyle: const HeaderStyle(
                 formatButtonVisible: false,
                 titleCentered: true, //この行を追加
               ),
+
+              // カレンダーのイベントの実装
+              eventLoader: (date) {
+                return todoEvents[date] ?? [];
+              },
+
               shouldFillViewport: true, // カレンダーの高さを調節可能に設定
               firstDay: DateTime.utc(2020, 1, 1),
               lastDay: DateTime.utc(2050, 1, 1),
@@ -206,14 +318,23 @@ class _ClassMainPageState extends State<ClassMainPage> {
               child: ListView.builder(
                 itemCount: _todoList.length,
                 itemBuilder: (BuildContext context, int index) {
-                  // [!未実装]TodoTaskTileのフィールドにコールバック関数を追加して、タスクが完了した場合に呼び出すように設定する
+                  // タスクが完了した場合の処理
                   return TodoTaskTile(
                     todo: _todoList[index],
-                    // Todoの削除を実装
+
+                    // Todoが削除された時の処理
                     todoWasDeleted: (todo) {
                       _todoList.remove(todo);
                       saveTodo();
-                      setState(() {}); // 再描画
+                      // カレンダーのイベントからも削除
+                      // Map todoEventsのkeyはDateTime.Utc()でない実装できないため
+                      // 変換を行っている(toUTC()では実装不可)
+                      DateTime utcDate = todo.deadline.toUtc();
+                      int utcYear = utcDate.year;
+                      int utcMonth = utcDate.month;
+                      int utcDay = utcDate.day;
+                      utcDate = DateTime.utc(utcYear, utcMonth, utcDay);
+                      todoEvents[utcDate]?.remove(todo.content);
                     },
 
                     // Todoのタスクのチェックボックスが変更された場合の処理
@@ -221,7 +342,6 @@ class _ClassMainPageState extends State<ClassMainPage> {
                       // Todoリストの該当するTodoのisDoneを更新
                       _todoList[_todoList.indexOf(todo)].isDone = !todo.isDone;
                       saveTodo();
-                      setState(() {}); // 再描画
                     },
                   );
                 },

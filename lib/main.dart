@@ -50,7 +50,7 @@ class _AppHomePageState extends State<AppHomePage> {
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 180), 
-      curve: Curves.easeOutSine,
+      curve: Curves.easeOut,
       );
 
     setState(() {
