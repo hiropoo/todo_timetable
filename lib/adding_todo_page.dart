@@ -50,11 +50,15 @@ class AddingTodoPageState extends State<AddingTodoPage> {
         },
         child: Column(
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
             Expanded(
               child: TextField(
                 controller: _textEditingController,
                 decoration: InputDecoration(
+                  labelStyle: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF666666),
+                  ),
                   labelText: "todoを入力してください",
                   filled: true,
                   fillColor: Colors.grey[100],

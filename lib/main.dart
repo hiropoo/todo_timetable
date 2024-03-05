@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       title: 'todo&timeTable',
       home: const AppHomePage(),
       theme: ThemeData(
-        primaryColor: const Color(0xFF9FA7DA),
+        primaryColor: const Color.fromARGB(255, 99, 110, 184)
       ),
       darkTheme: ThemeData(
         primaryColor: Colors.green,
