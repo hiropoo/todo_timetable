@@ -108,6 +108,8 @@ class _ClassMainPageState extends State<ClassMainPage> {
     return defaultTextColor;
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,17 +118,7 @@ class _ClassMainPageState extends State<ClassMainPage> {
         title: const Text('Todo',
             style: TextStyle(
                 fontWeight: FontWeight.w600, color: Color(0xFF666666))),
-        actions: [
-          Container(
-              margin: const EdgeInsets.only(right: 20),
-              child: IconButton(
-                  onPressed: () {
-                    print("todo画面のメニューボタンが押されました");
-                  },
-                  icon: const Icon(
-                    Icons.more_horiz,
-                  ))),
-        ],
+       
       ),
       body: SlidingUpPanel(
         borderRadius: const BorderRadius.only(

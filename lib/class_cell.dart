@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_timetable/class_cell_contents.dart';
+import 'package:todo_timetable/class_edit_dialog.dart';
 import 'package:todo_timetable/class_option_dialog.dart';
 
 // 曜日
@@ -42,7 +43,7 @@ class _ClassCellState extends State<ClassCell> {
   @override
   void initState() {
     super.initState();
-    getClassCellContents(); // sharedPreferenceからclassCellContentsを取得
+    loadClassCellContents(); // sharedPreferenceからclassCellContentsを取得
   }
 
   // classCellContentsをsharedPreferenceでローカルに保存するメソッド
@@ -52,12 +53,10 @@ class _ClassCellState extends State<ClassCell> {
     await prefs.setString(
         '${widget.day.string}_${widget.period}_classCellContents',
         json.encode(contents.toJson()));
-
-    print('saved : ${contents.toJson()}');
   }
 
   // sharedPreferenceからclassCellContentsを取得するメソッド
-  Future getClassCellContents() async {
+  Future loadClassCellContents() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? classCellContents = prefs
         .getString('${widget.day.string}_${widget.period}_classCellContents');
@@ -66,7 +65,6 @@ class _ClassCellState extends State<ClassCell> {
         contents = ClassCellContents.fromJson(json.decode(classCellContents));
       });
     }
-    print('loaded : classCellContents');
   }
 
   @override
@@ -89,6 +87,11 @@ class _ClassCellState extends State<ClassCell> {
               // タップされるとその授業の詳細ページに遷移
               context.go(
                   '/class_${widget.period}_${widget.day.index + 1}/${contents.className}/${contents.color.value}');
+            },
+            onLongPress: () async {
+              // 長押しされると授業を編集するモーダルを表示
+              await showClassEditDialog(context);
+              saveClassCellContents(); // sharedPreferenceに保存
             },
             child: Container(
                 margin: const EdgeInsets.only(bottom: 1.5),
@@ -146,7 +149,7 @@ class _ClassCellState extends State<ClassCell> {
       return Expanded(
         flex: 3,
         child: InkWell(
-          onTap: () async{
+          onTap: () async {
             // タップされると授業を追加するモーダルを表示
             await showClassNameDialog(context);
             saveClassCellContents(); // sharedPreferenceに保存
@@ -161,6 +164,7 @@ class _ClassCellState extends State<ClassCell> {
     }
   }
 
+  // 授業を追加するモーダルを表示するメソッド
   Future<void> showClassNameDialog(BuildContext context) async {
     String className = '';
     String roomName = '';
@@ -185,5 +189,43 @@ class _ClassCellState extends State<ClassCell> {
         contents.hasClass = true;
       });
     }
+  }
+
+  // 授業を編集するモーダルを表示するメソッド
+  Future<void> showClassEditDialog(BuildContext context) async {
+    String className = contents.className;
+    String roomName = contents.roomName;
+    Color color = contents.color;
+
+    // モーダルの戻り値は '授業名,教室名,カラーコード' の文字列
+    final returnContents = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => const ClassEditDialog(),
+    );
+
+    // 削除された場合は初期化して削除　（hasClass = false で削除可能）
+    if (returnContents == 'delete') {
+      setState(() {
+        contents.className = '';
+        contents.roomName = '';
+        contents.color = const Color(0xFFB7E6A6);
+        contents.hasClass = false;
+      });
+      return;
+    }
+
+
+    // 削除されず編集された場合は編集内容を反映
+    List<String> returnList = returnContents!.split(',');
+    className = returnList[0];
+    roomName = returnList[1];
+    color = Color(int.parse(returnList[2]));
+
+    setState(() {
+      contents.className = className;
+      contents.roomName = roomName;
+      contents.color = color;
+      contents.hasClass = true;
+    });
   }
 }
