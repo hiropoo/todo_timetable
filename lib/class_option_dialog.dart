@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class ClassNameDialog extends StatefulWidget {
-  const ClassNameDialog({super.key});
+class ClassOptionDialog extends StatefulWidget {
+  const ClassOptionDialog({super.key});
 
   @override
-  State<ClassNameDialog> createState() => _ClassNameDialogState();
+  State<ClassOptionDialog> createState() => _ClassOptionDialogState();
 }
 
-class _ClassNameDialogState extends State<ClassNameDialog> {
+class _ClassOptionDialogState extends State<ClassOptionDialog> {
   final TextEditingController _classNameController = TextEditingController();
 
   @override

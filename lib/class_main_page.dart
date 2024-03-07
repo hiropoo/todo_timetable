@@ -13,8 +13,9 @@ import 'package:todo_timetable/todo_task_tile.dart';
 
 class ClassMainPage extends StatefulWidget {
   final String className; // 授業名
+  final Color color; // 画面の色
 
-  const ClassMainPage({super.key, required this.className});
+  const ClassMainPage({super.key, required this.className, required this.color});
 
   @override
   State<ClassMainPage> createState() => _ClassMainPageState();
@@ -134,7 +135,7 @@ class _ClassMainPageState extends State<ClassMainPage> {
         backdropEnabled: true,
         controller: _panelController,
         minHeight: 0,
-        maxHeight: MediaQuery.of(context).size.height * 0.25,
+        maxHeight: MediaQuery.of(context).size.height * 0.3,
 
         // fab がスライドアップパネルに重ならないようにするための設定
         onPanelSlide: (position) {

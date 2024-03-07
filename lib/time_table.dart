@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:todo_timetable/class_name_dialog.dart';
+import 'package:todo_timetable/class_cell.dart';
 
 // 時間割を表示するウィジェット
 
@@ -13,7 +13,9 @@ class TimeTable extends StatelessWidget {
           title: const Center(
             child: Text('週時間割',
                 style: TextStyle(
-                    fontWeight: FontWeight.w600, color: Color(0xFF666666))),
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF666666),
+                    fontSize: 20)),
           ),
         ),
         body: const MainTable());
@@ -120,82 +122,5 @@ class TimeTableRow extends StatelessWidget {
         ClassCell(period: period, day: Day.friday),
       ]),
     );
-  }
-}
-
-// 時間割のセル(時限と曜日以外)を表示するウィジェット
-// ignore: must_be_immutable
-class ClassCell extends StatefulWidget {
-  final int period;
-  final Day day;
-  String className = ''; // 授業名
-
-  ClassCell({
-    super.key,
-    required this.period,
-    required this.day,
-  });
-
-  @override
-  State<ClassCell> createState() => _ClassCellState();
-}
-
-class _ClassCellState extends State<ClassCell> {
-  bool hasClass = false; // 授業がすでに追加されているかどうか
-  String className = ''; // 授業名
-  @override
-  void initState() {
-    super.initState();
-    className = widget.className;
-  }
-
-
-  @override
-  Widget build(BuildContext context) {
-    if(hasClass) {
-      return Expanded(
-        flex: 3,
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFCECECE)),
-          ),
-          child: Center(child: Text(widget.className, style: const TextStyle(color: Color(0xFF666666)),)),
-        ),
-      );
-    } else {
-    return Expanded(
-      flex: 3,
-      child: InkWell(
-        onTap: () {
-          
-            // タップされると授業を追加するモーダルを表示
-            showClassNameDialog(context);
-        
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFCECECE)),
-          ),
-        ),
-      ),
-    );
-
-    }
-  }
-
-  Future<void> showClassNameDialog(BuildContext context) async {
-    final className = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => const ClassNameDialog(),
-    );
-
-    if (className != null && className.isNotEmpty) {
-      setState(() {
-        widget.className = className;
-        hasClass = true;
-      });
-    }
   }
 }

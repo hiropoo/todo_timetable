@@ -16,7 +16,7 @@ class AddingTodoPage extends StatefulWidget {
   final PanelController panelController;
   final String className;
   final List<String> todoIdList;
-  final Function(Todo) todoWasAdded;  // Todoが追加されたときのコールバック関数
+  final Function(Todo) todoWasAdded; // Todoが追加されたときのコールバック関数
 
   @override
   AddingTodoPageState createState() => AddingTodoPageState();
@@ -27,7 +27,6 @@ class AddingTodoPageState extends State<AddingTodoPage> {
   DateTime _deadline = DateTime.now();
   String _todoContent = "";
 
-
   final Map<String, bool> _buttonIsActiveFlags = {
     'pickupButton': false,
     'todayButton': false,
@@ -37,7 +36,6 @@ class AddingTodoPageState extends State<AddingTodoPage> {
   bool _dateIsPicked = false; // 一度でも期限が選択されたかどうか
 
   final TextEditingController _textEditingController = TextEditingController();
-
 
   @override
   Widget build(BuildContext context) {
@@ -51,30 +49,29 @@ class AddingTodoPageState extends State<AddingTodoPage> {
         child: Column(
           children: [
             const SizedBox(height: 15),
-            Expanded(
-              child: TextField(
-                controller: _textEditingController,
-                decoration: InputDecoration(
-                  labelStyle: const TextStyle(
-                    fontSize: 15,
-                    color: Color(0xFF666666),
-                  ),
-                  labelText: "todoを入力してください",
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+            TextField(
+              controller: _textEditingController,
+              decoration: InputDecoration(
+                labelStyle: const TextStyle(
+                  fontSize: 15,
+                  color: Color(0xFF666666),
                 ),
-                onChanged: (text) {
-                  setState(() {
-                    _todoContent = text;
-                  });
-                },
+                labelText: "todoを入力してください",
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
               ),
+              onChanged: (text) {
+                setState(() {
+                  _todoContent = text;
+                });
+              },
             ),
             const SizedBox(height: 10),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () async {
@@ -269,5 +266,4 @@ class AddingTodoPageState extends State<AddingTodoPage> {
       ),
     );
   }
-
 }

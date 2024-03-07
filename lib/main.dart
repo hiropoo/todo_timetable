@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:todo_timetable/class_main_page.dart';
+import 'package:todo_timetable/router.dart';
 import 'package:todo_timetable/time_table.dart';
 
 void main() {
@@ -14,18 +15,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'todo&timeTable',
-      home: const AppHomePage(),
       theme: ThemeData(
         primaryColor: const Color.fromARGB(255, 99, 110, 184)
       ),
       darkTheme: ThemeData(
         primaryColor: Colors.green,
         brightness: Brightness.dark,
-      )
+      ),
+      routerDelegate: router.routerDelegate,
+      routeInformationParser: router.routeInformationParser,
+      routeInformationProvider: router.routeInformationProvider,
     );
+
+
   }
 }
 
@@ -42,7 +47,7 @@ class _AppHomePageState extends State<AppHomePage> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     const TimeTable(),
-    ClassMainPage(className: "線形代数学"),   // 仮
+    const ClassMainPage(className: "線形代数学", color: Color(0xFFB7E6A6)),   // 仮
   ];
 
   //Iconクリック時の処理
