@@ -83,14 +83,7 @@ class DayWidget extends StatelessWidget {
   }
 }
 
-// 曜日
-enum Day {
-  monday,
-  tuesday,
-  wednesday,
-  thursday,
-  friday,
-}
+
 
 // 時限ごとの時間割を表示するウィジェット
 class TimeTableRow extends StatelessWidget {

@@ -91,7 +91,8 @@ class _ClassMainPageState extends State<ClassMainPage> {
         '${widget.className}_todoList', todoListJson); // todoListを保存
 
     setState(() {}); // 画面を更新
-    print('todoListを保存しました. todoList: $todoListJson');
+
+    print('todoListを保存しました. todoList: $todoListJson'); // デバッグ用
   }
 
   // カレンダーの日付のテキストカラーを変えるメソッド(土: 青, 日: 赤, 他: 黒)
@@ -184,7 +185,7 @@ class _ClassMainPageState extends State<ClassMainPage> {
         child: Container(
           margin: const EdgeInsets.only(right: 25),
           child: FloatingActionButton(
-            backgroundColor: const Color(0xFFB7E6A6),
+            backgroundColor: widget.color,
             // floatingActionButtonが押された場合はスライドアップパネルを表示する
             onPressed: () {
               _panelController.open();
@@ -212,8 +213,8 @@ class _ClassMainPageState extends State<ClassMainPage> {
           Container(
               height: 50,
               width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Color(0xFFB7E6A6),
+              decoration:  BoxDecoration(
+                color: widget.color,
               ),
               child: Center(
                 child: Text(
@@ -262,11 +263,11 @@ class _ClassMainPageState extends State<ClassMainPage> {
                         ),
                       ));
                     } else {
-                      markers.add(const Text(
+                      markers.add( Text(
                         '●',
                         style: TextStyle(
                           fontSize: 7,
-                          color: Color(0xFFB7E6A6),
+                          color: widget.color,
                         ),
                       ));
                     }
@@ -275,7 +276,7 @@ class _ClassMainPageState extends State<ClassMainPage> {
                 }
 
                 return Padding(
-                  padding: const EdgeInsets.only(top: 25),
+                  padding: const EdgeInsets.only(top: 27),
                   child: Wrap(
                     alignment: WrapAlignment.center,
                     children: markers,
