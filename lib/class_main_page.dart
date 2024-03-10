@@ -3,19 +3,22 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:todo_timetable/adding_todo_page.dart';
 import 'package:todo_timetable/todo.dart';
+import 'package:todo_timetable/todo_add_page.dart';
+import 'package:todo_timetable/todo_edit_page.dart';
 import 'package:todo_timetable/todo_task_tile.dart';
 
 class ClassMainPage extends StatefulWidget {
   final String className; // 授業名
   final Color color; // 画面の色
 
-  const ClassMainPage({super.key, required this.className, required this.color});
+  const ClassMainPage(
+      {super.key, required this.className, required this.color});
 
   @override
   State<ClassMainPage> createState() => _ClassMainPageState();
@@ -31,6 +34,9 @@ class _ClassMainPageState extends State<ClassMainPage> {
   final List<String> todoIdList = []; // タスクIDリスト
 
   Map<DateTime?, List<String>> todoEvents = {}; // カレンダーのイベント(TodoのIDを保存)
+
+  bool _isEditing = false; // 編集モードかどうか　=> スライドアップパネルを切り替えるためのフラグ
+  GlobalObjectKey? todoEditKey;
 
   @override
   void initState() {
@@ -56,12 +62,14 @@ class _ClassMainPageState extends State<ClassMainPage> {
 
     // Todoリストを更新
     setState(() {
+      _todoList.clear();
       _todoList.addAll(todoList);
     });
   }
 
   // TodoListからTodoのイベントを読み込むメソッド
   void loadTodoEvents() {
+    todoEvents.clear();
     for (Todo todo in _todoList) {
       DateTime? utcDate = todo.deadline.toUtc();
       int utcYear = utcDate.year;
@@ -108,17 +116,15 @@ class _ClassMainPageState extends State<ClassMainPage> {
     return defaultTextColor;
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
+    todoEditKey = GlobalObjectKey<TodoEditPageState>(context);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: const Text('Todo',
             style: TextStyle(
                 fontWeight: FontWeight.w600, color: Color(0xFF666666))),
-       
       ),
       body: SlidingUpPanel(
         borderRadius: const BorderRadius.only(
@@ -144,33 +150,82 @@ class _ClassMainPageState extends State<ClassMainPage> {
           }
         },
         body: _body(_panelController),
-        panel: AddingTodoPage(
-          panelController: _panelController,
-          className: widget.className,
-          todoIdList: todoIdList,
 
-          // addingTodoPageからTodoが追加された場合の処理
-          todoWasAdded: (todo) async {
-            // Todoリストに追加してローカルに保存
-            _todoList.add(todo);
-            await saveTodo();
+        // 編集中モードか追加するモードかで表示するスライドアップパネルを変える
+        panel: _isEditing
+            // 編集中の場合
+            ? TodoEditPage(
+                key: todoEditKey,
+                panelController: _panelController,
+                todoIdList: todoIdList,
 
-            setState(() {
-              // カレンダーのイベントに追加
-              // Map todoEventsのkeyはDateTime.Utc()でない実装できないため変換を行っている(toUTC()では実装不可)
-              DateTime utcDate = todo.deadline.toUtc();
-              int utcYear = utcDate.year;
-              int utcMonth = utcDate.month;
-              int utcDay = utcDate.day;
-              utcDate = DateTime.utc(utcYear, utcMonth, utcDay);
-              if (todoEvents[utcDate] == null) {
-                todoEvents[utcDate] = [todo.content];
-              } else {
-                todoEvents[utcDate]?.add(todo.content);
-              }
-            });
-          },
-        ),
+                // TodoEditPageでTodoが更新された場合の処理
+                // 編集前のoldTodoと編集後のnewTodoを引数に取る
+                // oldTodoは削除し、newTodoは追加の処理を行う
+                todoWasEdited: (oldTodo, newTodo) async {
+                  _todoList.remove(oldTodo);
+                  saveTodo();
+                  // カレンダーのイベントからも削除
+                  // Map todoEventsのkeyはDateTime.Utc()でない実装できないため
+                  // 変換を行っている(toUTC()では実装不可)
+                  DateTime utcDate = oldTodo.deadline.toUtc();
+                  int utcYear = utcDate.year;
+                  int utcMonth = utcDate.month;
+                  int utcDay = utcDate.day;
+                  utcDate = DateTime.utc(utcYear, utcMonth, utcDay);
+                  todoEvents[utcDate]?.remove(oldTodo.content);
+                  // Todoリストに追加してローカルに保存
+                  _todoList.add(newTodo);
+                  await saveTodo();
+
+                  setState(() {
+                    // カレンダーのイベントに追加
+                    // Map todoEventsのkeyはDateTime.Utc()でない実装できないため変換を行っている(toUTC()では実装不可)
+                    DateTime utcDate = newTodo.deadline.toUtc();
+                    int utcYear = utcDate.year;
+                    int utcMonth = utcDate.month;
+                    int utcDay = utcDate.day;
+                    utcDate = DateTime.utc(utcYear, utcMonth, utcDay);
+                    if (todoEvents[utcDate] == null) {
+                      todoEvents[utcDate] = [newTodo.content];
+                    } else {
+                      todoEvents[utcDate]?.add(newTodo.content);
+                    }
+                  });
+                },
+              )
+
+            // Todoを追加するモードの場合
+            : TodoAddPage(
+                panelController: _panelController,
+                className: widget.className,
+                todoIdList: todoIdList,
+
+                // TodoAddPageからTodoが追加された場合の処理
+                todoWasAdded: (todo) async {
+                  // Todoリストに追加してローカルに保存
+                  _todoList.add(todo);
+                  await saveTodo();
+
+                  // カレンダーのイベントに追加
+                  // Map todoEventsのkeyはDateTime.Utc()でない実装できないため変換を行っている(toUTC()では実装不可)
+                  DateTime utcDate = todo.deadline.toUtc();
+                  int utcYear = utcDate.year;
+                  int utcMonth = utcDate.month;
+                  int utcDay = utcDate.day;
+                  utcDate = DateTime.utc(utcYear, utcMonth, utcDay);
+                  if (todoEvents[utcDate] == null) {
+                    todoEvents[utcDate] = [todo.content];
+                  } else {
+                    todoEvents[utcDate]?.add(todo.content);
+                  }
+                  
+                  // Todoが追加された場合は_todoListを更新してカレンダーのイベントを更新
+                  loadTodo().then((value) {
+                    loadTodoEvents();
+                  });
+                },
+              ),
       ),
       floatingActionButton: Visibility(
         visible: _isVisible,
@@ -180,8 +235,10 @@ class _ClassMainPageState extends State<ClassMainPage> {
             backgroundColor: widget.color,
             // floatingActionButtonが押された場合はスライドアップパネルを表示する
             onPressed: () {
+              HapticFeedback.mediumImpact();
               _panelController.open();
               setState(() {
+                _isEditing = false;
                 _isVisible = false;
               });
             },
@@ -205,7 +262,7 @@ class _ClassMainPageState extends State<ClassMainPage> {
           Container(
               height: 50,
               width: double.infinity,
-              decoration:  BoxDecoration(
+              decoration: BoxDecoration(
                 color: widget.color,
               ),
               child: Center(
@@ -255,7 +312,7 @@ class _ClassMainPageState extends State<ClassMainPage> {
                         ),
                       ));
                     } else {
-                      markers.add( Text(
+                      markers.add(Text(
                         '●',
                         style: TextStyle(
                           fontSize: 7,
@@ -264,7 +321,6 @@ class _ClassMainPageState extends State<ClassMainPage> {
                       ));
                     }
                   }
-                  
                 }
 
                 return Padding(
@@ -274,7 +330,6 @@ class _ClassMainPageState extends State<ClassMainPage> {
                     children: markers,
                   ),
                 );
-
               }),
               startingDayOfWeek: StartingDayOfWeek.sunday,
               // カレンダーの上の部分のスタイルを変えるための設定
@@ -336,6 +391,24 @@ class _ClassMainPageState extends State<ClassMainPage> {
                       // Todoリストの該当するTodoのisDoneを更新
                       _todoList[_todoList.indexOf(todo)].isDone = !todo.isDone;
                       saveTodo();
+                    },
+
+                    // Todo長押しされた場合の処理　(Todoを編集)
+                    todoWasLongPressed: (todo) async {
+                      setState(() {
+                        _isEditing = true;
+                        _isVisible = false;
+                      });
+
+                      // keyを取得するために少し待機
+                      await Future.delayed(const Duration(milliseconds: 100));
+
+                      (todoEditKey?.currentState as TodoEditPageState)
+                          .setTodo(todo);
+
+                      // Todoを編集
+                      HapticFeedback.mediumImpact();
+                      _panelController.open();
                     },
                   );
                 },

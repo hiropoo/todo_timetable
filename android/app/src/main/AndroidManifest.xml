@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- haptic feedbackの権限要求(ココ！) -->
+    <uses-permission android:name="android.permission.VIBRATE" /> 
     <application
         android:label="todo_timetable"
         android:name="${applicationName}"

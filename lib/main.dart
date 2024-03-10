@@ -47,7 +47,7 @@ class _AppHomePageState extends State<AppHomePage> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     const TimeTable(),
-    const ClassMainPage(className: "線形代数学", color: Color(0xFFB7E6A6)),   // 仮
+    const ClassMainPage(className: "すべてのTodo", color: Color.fromARGB(255, 130, 144, 237)),   // 仮
   ];
 
   //Iconクリック時の処理

@@ -5,8 +5,8 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:todo_timetable/todo.dart';
 import 'package:uuid/uuid.dart';
 
-class AddingTodoPage extends StatefulWidget {
-  const AddingTodoPage({
+class TodoAddPage extends StatefulWidget {
+  const TodoAddPage({
     super.key,
     required this.panelController,
     required this.className,
@@ -19,10 +19,10 @@ class AddingTodoPage extends StatefulWidget {
   final Function(Todo) todoWasAdded; // Todoが追加されたときのコールバック関数
 
   @override
-  AddingTodoPageState createState() => AddingTodoPageState();
+  TodoAddPageState createState() => TodoAddPageState();
 }
 
-class AddingTodoPageState extends State<AddingTodoPage> {
+class TodoAddPageState extends State<TodoAddPage> {
   /* 入力する期限、内容をstateで保存 */
   DateTime _deadline = DateTime.now();
   String _todoContent = "";
@@ -70,8 +70,7 @@ class AddingTodoPageState extends State<AddingTodoPage> {
               },
             ),
             const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () async {
@@ -213,10 +212,6 @@ class AddingTodoPageState extends State<AddingTodoPage> {
                           id: newId,
                         );
                         widget.todoWasAdded(newTodo);
-
-                        // デバッグ用
-                        print('todo: $_todoContent');
-                        print('deadline: $_deadline');
 
                         // 変数をリセット
                         _textEditingController.clear();

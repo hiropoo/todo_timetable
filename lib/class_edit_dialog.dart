@@ -299,12 +299,12 @@ class _ClassEditDialogState extends State<ClassEditDialog> {
                       CupertinoDialogAction(
                         isDestructiveAction: true,
                         onPressed: () => Navigator.of(context).pop('cancel'),
-                        child: const Text('Cancel'),
+                        child:  Text('Cancel', style: TextStyle(color: Colors.blue[600]),),
                       ),
                       CupertinoDialogAction(
                         child: const Text(
                           'OK',
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(color: Colors.red),
                         ),
                         onPressed: () {
                           Navigator.of(context).pop();  // 現在のダイアログを閉じる

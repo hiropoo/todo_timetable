@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -84,12 +85,15 @@ class _ClassCellState extends State<ClassCell> {
           // 授業のアイコンを表示するコンテナ
           child: GestureDetector(
             onTap: () {
+              HapticFeedback.lightImpact();
               // タップされるとその授業の詳細ページに遷移
               context.go(
                   '/class_${widget.period}_${widget.day.index + 1}/${contents.className}/${contents.color.value}');
             },
+
             onLongPress: () async {
               // 長押しされると授業を編集するモーダルを表示
+              HapticFeedback.heavyImpact(); // 長押しのフィードバック
               await showClassEditDialog(context);
               saveClassCellContents(); // sharedPreferenceに保存
             },

@@ -10,11 +10,13 @@ class TodoTaskTile extends StatefulWidget {
     required this.todo,
     required this.todoWasDeleted,
     required this.todoWasTapped,
+    required this.todoWasLongPressed,
   });
 
   final Todo todo;
   final Function(Todo) todoWasDeleted; // Todoが削除されたときのコールバック
   final Function(Todo) todoWasTapped; // Todoがタップされたときのコールバック
+  final Function(Todo) todoWasLongPressed; // Todoが長押しされたときのコールバック
 
   @override
   State<TodoTaskTile> createState() => _TodoTaskTileState();
@@ -35,8 +37,6 @@ class _TodoTaskTileState extends State<TodoTaskTile> {
         (Timer t) => setState(() {
               now = DateTime.now(); // 1分ごとに現在時刻を更新
             }));
-
-    // データベースに登録されているタスクの状態を取得
   }
 
   @override
@@ -45,6 +45,24 @@ class _TodoTaskTileState extends State<TodoTaskTile> {
 
     return Slidable(
       key: Key(widget.todo.id),
+      startActionPane: ActionPane(
+        key: const ValueKey('end'),
+        
+        extentRatio: 0.2,
+        motion: const StretchMotion(),
+        children: [
+          SlidableAction(
+            onPressed: (context) {
+              widget.todoWasLongPressed(widget.todo); // Todoを編集
+            },
+            borderRadius: const BorderRadius.all(Radius.circular(15)),
+            backgroundColor: Colors.grey,
+            foregroundColor: Colors.white,
+            icon: Icons.edit,
+            label: '編集',
+          ),
+        ],
+      ),
       endActionPane: ActionPane(
         key: const ValueKey('end'),
         dismissible: DismissiblePane(
@@ -57,9 +75,9 @@ class _TodoTaskTileState extends State<TodoTaskTile> {
         children: [
           SlidableAction(
             onPressed: (context) {
-              
               widget.todoWasDeleted(widget.todo); // Todoを削除
             },
+            borderRadius: const BorderRadius.all(Radius.circular(15)),
             backgroundColor: const Color(0xFFFE4A49),
             foregroundColor: Colors.white,
             icon: Icons.delete,
@@ -74,6 +92,11 @@ class _TodoTaskTileState extends State<TodoTaskTile> {
             isDone = !isDone;
           });
           widget.todoWasTapped(widget.todo);
+        },
+        onLongPress: () {
+          // 長押しされた場合はコールバック関数を呼び出す
+          // 呼び出す側はコールバック関数を受け取って、Todoの編集を行う
+          widget.todoWasLongPressed(widget.todo);
         },
         child: Container(
           margin: const EdgeInsets.fromLTRB(10, 2, 10, 2),
