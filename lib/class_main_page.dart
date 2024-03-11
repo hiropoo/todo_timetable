@@ -193,6 +193,11 @@ class _ClassMainPageState extends State<ClassMainPage> {
                       todoEvents[utcDate]?.add(newTodo.content);
                     }
                   });
+
+                  // _todoListを更新してカレンダーのイベントを更新
+                  loadTodo().then((value) {
+                    loadTodoEvents();
+                  });
                 },
               )
 
