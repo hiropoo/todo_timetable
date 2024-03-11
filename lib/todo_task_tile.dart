@@ -48,9 +48,9 @@ class _TodoTaskTileState extends State<TodoTaskTile> {
       child: Slidable(
         key: Key(widget.todo.id),
         startActionPane: ActionPane(
-          key: const ValueKey('end'),
+          key: const ValueKey('end'), // 何かしらの値を持つkeyを指定する必要あり
           
-          extentRatio: 0.2,
+          extentRatio: 0.22,
           motion: const StretchMotion(),
           children: [
             SlidableAction(
@@ -72,7 +72,7 @@ class _TodoTaskTileState extends State<TodoTaskTile> {
               widget.todoWasDeleted(widget.todo);
             },
           ),
-          extentRatio: 0.2,
+          extentRatio: 0.22,
           motion: const StretchMotion(),
           children: [
             SlidableAction(

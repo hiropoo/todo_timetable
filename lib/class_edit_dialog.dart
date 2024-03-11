@@ -1,15 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:todo_timetable/class_cell_contents.dart';
 import 'package:todo_timetable/constant/color.dart';
 
 class ClassEditDialog extends StatefulWidget {
   const ClassEditDialog({super.key});
 
   @override
-  State<ClassEditDialog> createState() => _ClassEditDialogState();
+  State<ClassEditDialog> createState() => ClassEditDialogState();
 }
 
-class _ClassEditDialogState extends State<ClassEditDialog> {
+class ClassEditDialogState extends State<ClassEditDialog> {
   final TextEditingController _classNameController = TextEditingController();
   final TextEditingController _roomNameController = TextEditingController();
 
@@ -23,6 +24,15 @@ class _ClassEditDialogState extends State<ClassEditDialog> {
     return _classNameController.text.isNotEmpty &&
         _roomNameController.text.isNotEmpty;
   }
+
+  void setClassContents(ClassCellContents contents) {
+    setState(() {
+      _classNameController.text = contents.className;
+      _roomNameController.text = contents.roomName;
+      selectedColor = contents.color;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {

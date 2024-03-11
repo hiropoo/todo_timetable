@@ -31,7 +31,8 @@ class _ClassMainPageState extends State<ClassMainPage> {
   final PanelController _panelController = PanelController();
   bool _isVisible = true;
   final List<Todo> _todoList = []; // Todoリスト
-  final List<String> todoIdList = []; // タスクIDリスト
+  // タスクIDリスト (static にすることで教科を跨いでID情報を共有)
+  static final List<String> todoIdList = []; 
 
   Map<DateTime?, List<String>> todoEvents = {}; // カレンダーのイベント(TodoのIDを保存)
 

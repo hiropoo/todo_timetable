@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:todo_timetable/class_main_page.dart';
+import 'package:todo_timetable/all_todo_page.dart';
 import 'package:todo_timetable/router.dart';
 import 'package:todo_timetable/time_table.dart';
 
@@ -47,7 +47,7 @@ class _AppHomePageState extends State<AppHomePage> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     const TimeTable(),
-    const ClassMainPage(className: "すべてのTodo", color: Color.fromARGB(255, 130, 144, 237)),   // 仮
+    const AllTodoPage(className: "すべてのTodo", color: Color.fromARGB(255, 130, 144, 237)),   // 仮
   ];
 
   //Iconクリック時の処理
@@ -78,8 +78,7 @@ class _AppHomePageState extends State<AppHomePage> {
             icon: Icon(Icons.stacked_bar_chart),
             label: '時間割',
           ),
-          BottomNavigationBarItem(
-            
+          BottomNavigationBarItem( 
             icon: Icon(Icons.calendar_month),
             label: '課題',
           ),

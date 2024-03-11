@@ -1,3 +1,7 @@
+// 時間割のマス目を表示するクラス
+// マス目をタップすると授業を追加するモーダルが表示される
+// すでに授業が追加されている状態で、マス目を長押しすると授業を編集するモーダルが表示される
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -70,6 +74,8 @@ class _ClassCellState extends State<ClassCell> {
 
   @override
   Widget build(BuildContext context) {
+    
+
     if (contents.hasClass) {
       return Expanded(
         flex: 3,
@@ -90,11 +96,12 @@ class _ClassCellState extends State<ClassCell> {
               context.go(
                   '/class_${widget.period}_${widget.day.index + 1}/${contents.className}/${contents.color.value}');
             },
-
             onLongPress: () async {
               // 長押しされると授業を編集するモーダルを表示
               HapticFeedback.heavyImpact(); // 長押しのフィードバック
+              if (!context.mounted) return;
               await showClassEditDialog(context);
+              
               saveClassCellContents(); // sharedPreferenceに保存
             },
             child: Container(
@@ -200,12 +207,16 @@ class _ClassCellState extends State<ClassCell> {
     String className = contents.className;
     String roomName = contents.roomName;
     Color color = contents.color;
+    // 授業を編集するモーダルにアクセスするためのGlobalObjectKey
+    GlobalObjectKey classEditDialogKey =
+        GlobalObjectKey<ClassEditDialogState>(context);
 
     // モーダルの戻り値は '授業名,教室名,カラーコード' の文字列
     final returnContents = await showDialog<String>(
       context: context,
-      builder: (BuildContext context) => const ClassEditDialog(),
+      builder: (BuildContext context) =>  ClassEditDialog(key: classEditDialogKey),
     );
+
 
     // 削除された場合は初期化して削除　（hasClass = false で削除可能）
     if (returnContents == 'delete') {
@@ -217,7 +228,6 @@ class _ClassCellState extends State<ClassCell> {
       });
       return;
     }
-
 
     // 削除されず編集された場合は編集内容を反映
     List<String> returnList = returnContents!.split(',');
