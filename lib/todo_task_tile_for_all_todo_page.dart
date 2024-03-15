@@ -85,7 +85,7 @@ class _TodoTaskTileForAllTodoPageState extends State<TodoTaskTileForAllTodoPage>
             
             // 授業名の表示
             ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 70, maxWidth: 70, minHeight: 20, maxHeight: 20),
+              constraints: const BoxConstraints(minWidth: 100, maxWidth: 100, minHeight: 20, maxHeight: 20),
               child: Container(
                 padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                 decoration: BoxDecoration(

@@ -331,7 +331,18 @@ class ClassMainPageState extends ConsumerState<ClassMainPage> {
                   // 該当のTodoが_todoList内に存在する場合にのみ処理を実行
                   int index = _todoList.indexWhere((todo) => todo.id == todoId);
                   if (index != -1) {
-                    if (_todoList[index].isDone) {
+                    if ((!_todoList[index].isDone &&
+                        _todoList[index].deadline
+                            .isBefore(DateTime.now()))) {
+                      markers.add(const Text(
+                        '●',
+                        style: TextStyle(
+                          fontSize: 7,
+                          color: Colors.red,
+                        ),
+                      ));
+                    } 
+                    else if (_todoList[index].isDone) {
                       markers.add(Text(
                         '●',
                         style: TextStyle(
