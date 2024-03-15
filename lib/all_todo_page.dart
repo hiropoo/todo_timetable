@@ -99,11 +99,11 @@ class AllTodoPage extends ConsumerWidget {
                           ),
                         ));
                       } else {
-                        markers.add(const Text(
+                        markers.add( Text(
                           '●',
                           style: TextStyle(
                             fontSize: 7,
-                            color: Color.fromARGB(255, 99, 110, 184),
+                            color: allTodoList.asData!.value[index].classColor,
                           ),
                         ));
                       }
@@ -154,7 +154,7 @@ class AllTodoPage extends ConsumerWidget {
             child: ListView.builder(
               itemCount: allTodoList.when(data: (data) {
                 return data.length;
-              }, error: (error, stackTrace) {
+              }, error: (_, __) {
                 return 0;
               }, loading: () {
                 return 0;
@@ -164,12 +164,14 @@ class AllTodoPage extends ConsumerWidget {
                 return TodoTaskTileForAllTodoPage(
                   todo: allTodoList.when(data: (data) {
                     return data[index];
-                  }, error: (error, stackTrace) {
+                  }, error: (_, __) {
                     return Todo(
                       isDone: false,
                       content: 'error',
                       deadline: DateTime.now(),
                       id: '',
+                      className: '',
+                      classColor: Colors.white,
                     );
                   }, loading: () {
                     return Todo(
@@ -177,6 +179,8 @@ class AllTodoPage extends ConsumerWidget {
                       content: 'loading...',
                       deadline: DateTime.now(),
                       id: '',
+                      className: '',
+                      classColor: Colors.white,
                     );
                   }),
                 );

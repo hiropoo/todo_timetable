@@ -13,8 +13,12 @@ class TodoEditPage extends StatefulWidget {
     required this.panelController,
     required this.todoIdList,
     required this.todoWasEdited,
+    required this.className,
+    required this.classColor,
   });
   final PanelController panelController;
+  final String className;
+  final Color classColor;
   final List<String> todoIdList;
   final Function(Todo oldTodo, Todo newTodo)
       todoWasEdited; // Todoが追加されたときのコールバック関数
@@ -227,6 +231,8 @@ class TodoEditPageState extends State<TodoEditPage> {
                           content: _todoContent,
                           deadline: _deadline,
                           id: newId,
+                          className: widget.className,
+                          classColor: widget.classColor,
                         );
                         widget.todoWasEdited(
                             editTodo!, newTodo); // Todoが更新されたときのコールバック関数

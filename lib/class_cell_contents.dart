@@ -7,10 +7,10 @@ part 'class_cell_contents.g.dart';
 @JsonSerializable()
 class ClassCellContents {
   String className = ''; // 授業名
-  String roomName = ''; // 教室名（仮）本来はclassNameと同様にモーダルから取得
+  String roomName = ''; // 教室名 モーダルから取得
 
   @ColorConverter()
-  Color color = const Color(0xFFB7E6A6); // 授業の色（仮）本来はclassNameと同様にモーダルから取得
+  Color color = const Color(0xFFB7E6A6); //モーダルから取得
   bool hasClass = false; // 授業がすでに追加されているかどうか
 
   ClassCellContents({

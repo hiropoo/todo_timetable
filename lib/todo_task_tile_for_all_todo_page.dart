@@ -82,24 +82,88 @@ class _TodoTaskTileForAllTodoPageState extends State<TodoTaskTileForAllTodoPage>
             const SizedBox(
               width: 10,
             ),
+            
+            // 授業名の表示
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 70, maxWidth: 70, minHeight: 20, maxHeight: 20),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: widget.todo.classColor,
+                  ),
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    widget.todo.className,
+                    style: const TextStyle(
+                      color: const Color(0xFF666666),
+                    ),
+                  ),
+                )
+              ),
+            ),
+
+            const SizedBox(
+              width: 20,
+            ),
+
             if (diffTime.inDays > 0)
-              Text("残り${diffTime.inDays}日",
-                  style: const TextStyle(color: Color(0xFF666666)))
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 60, maxWidth: 60),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text("残り${diffTime.inDays}日",
+                      style: const TextStyle(color: Color(0xFF666666))),
+                ),
+              )
             else if (diffTime.inHours > 0)
-              Text("残り${diffTime.inHours}時間",
-                  style: const TextStyle(color: Color(0xFF666666)))
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 60, maxWidth: 60),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text("残り${diffTime.inHours}時間",
+                      style: const TextStyle(color: Color(0xFF666666))),
+                ),
+              )
             else if (diffTime.inMinutes > 0)
-              Text("残り${diffTime.inMinutes}分",
-                  style: const TextStyle(color: Color(0xFF666666)))
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 60, maxWidth: 60),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text("残り${diffTime.inMinutes}分",
+                      style: const TextStyle(color: Color(0xFF666666))),
+                ),
+              )
             else if (diffTime.inMinutes <= 0 && diffTime.inHours == 0 && diffTime.inDays == 0)
-              Text("期限超過${diffTime.inMinutes.abs()}分",
-                  style: const TextStyle(color: Colors.red,))
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 60, maxWidth: 60),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text("超過${diffTime.inMinutes.abs()}分",
+                      style: const TextStyle(color: Colors.red,)),
+                ),
+              )
             else if (diffTime.inHours <= 0&& diffTime.inDays == 0)
-               Text("期限超過${diffTime.inHours.abs()}時間",
-                  style: const TextStyle(color: Colors.red, ))
+               ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 60, maxWidth: 60),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text("超過${diffTime.inHours.abs()}時間",
+                      style: const TextStyle(color: Colors.red, )),
+                ),
+               )
             else if(diffTime.inDays <= 0)
-              Text("期限超過${diffTime.inDays.abs()}日",
-                  style: const TextStyle(color: Colors.red,)),
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 60, maxWidth: 60),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text("超過${diffTime.inDays.abs()}日",
+                      style: const TextStyle(color: Colors.red,)),
+                ),
+              ),
             const SizedBox(
               width: 20,
             ),

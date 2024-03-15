@@ -11,6 +11,8 @@ Todo _$TodoFromJson(Map<String, dynamic> json) => Todo(
       content: json['content'] as String,
       deadline: DateTime.parse(json['deadline'] as String),
       id: json['id'] as String,
+      className: json['className'] as String,
+      classColor: const ColorConverter().fromJson(json['classColor'] as int),
     );
 
 Map<String, dynamic> _$TodoToJson(Todo instance) => <String, dynamic>{
@@ -18,4 +20,6 @@ Map<String, dynamic> _$TodoToJson(Todo instance) => <String, dynamic>{
       'content': instance.content,
       'deadline': instance.deadline.toIso8601String(),
       'id': instance.id,
+      'className': instance.className,
+      'classColor': const ColorConverter().toJson(instance.classColor),
     };

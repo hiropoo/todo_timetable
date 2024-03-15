@@ -166,6 +166,8 @@ class ClassMainPageState extends ConsumerState<ClassMainPage> {
                 key: todoEditKey,
                 panelController: _panelController,
                 todoIdList: todoIdList,
+                className: widget.className,
+                classColor: widget.color,
 
                 // TodoEditPageでTodoが更新された場合の処理
                 // 編集前のoldTodoと編集後のnewTodoを引数に取る
@@ -219,6 +221,7 @@ class ClassMainPageState extends ConsumerState<ClassMainPage> {
                 panelController: _panelController,
                 className: widget.className,
                 todoIdList: todoIdList,
+                classColor: widget.color,
 
                 // TodoAddPageからTodoが追加された場合の処理
                 todoWasAdded: (todo) {

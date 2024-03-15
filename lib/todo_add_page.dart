@@ -12,11 +12,13 @@ class TodoAddPage extends StatefulWidget {
     required this.className,
     required this.todoIdList,
     required this.todoWasAdded,
+    required this.classColor,
   });
   final PanelController panelController;
   final String className;
   final List<String> todoIdList;
   final Function(Todo) todoWasAdded; // Todoが追加されたときのコールバック関数
+  final Color classColor;
 
   @override
   TodoAddPageState createState() => TodoAddPageState();
@@ -210,6 +212,8 @@ class TodoAddPageState extends State<TodoAddPage> {
                           content: _todoContent,
                           deadline: _deadline,
                           id: newId,
+                          className: widget.className,
+                          classColor: widget.classColor,
                         );
                         widget.todoWasAdded(newTodo);
 
