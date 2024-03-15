@@ -1,16 +1,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_timetable/all_todo_list.dart';
 import 'package:todo_timetable/class_cell_contents.dart';
 import 'package:todo_timetable/constant/color.dart';
 
-class ClassEditDialog extends StatefulWidget {
-  const ClassEditDialog({super.key});
+class ClassEditDialog extends ConsumerStatefulWidget {
+  const ClassEditDialog({super.key, required this.className});
+
+  final String className;
 
   @override
-  State<ClassEditDialog> createState() => ClassEditDialogState();
+  ClassEditDialogState createState() => ClassEditDialogState();
 }
 
-class ClassEditDialogState extends State<ClassEditDialog> {
+class ClassEditDialogState extends ConsumerState<ClassEditDialog> {
   final TextEditingController _classNameController = TextEditingController();
   final TextEditingController _roomNameController = TextEditingController();
 
@@ -32,7 +36,6 @@ class ClassEditDialogState extends State<ClassEditDialog> {
       selectedColor = contents.color;
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -299,7 +302,7 @@ class ClassEditDialogState extends State<ClassEditDialog> {
       actions: [
         TextButton(
           onPressed: () {
-             showDialog(
+            showDialog(
                 context: context,
                 builder: (context) {
                   return CupertinoAlertDialog(
@@ -309,7 +312,10 @@ class ClassEditDialogState extends State<ClassEditDialog> {
                       CupertinoDialogAction(
                         isDestructiveAction: true,
                         onPressed: () => Navigator.of(context).pop('cancel'),
-                        child:  Text('Cancel', style: TextStyle(color: Colors.blue[600]),),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.blue[600]),
+                        ),
                       ),
                       CupertinoDialogAction(
                         child: const Text(
@@ -317,9 +323,12 @@ class ClassEditDialogState extends State<ClassEditDialog> {
                           style: TextStyle(color: Colors.red),
                         ),
                         onPressed: () {
-                          Navigator.of(context).pop();  // 現在のダイアログを閉じる
-                          Navigator.of(context).pop('delete');  // 前のダイアログを閉じる
-                          },
+                          final notifier = ref.read(allTodoListNotifierProvider.notifier);
+                          notifier.removeAllTodoByClassName(widget.className);
+
+                          Navigator.of(context).pop(); // 現在のダイアログを閉じる
+                          Navigator.of(context).pop('delete'); // 前のダイアログを閉じる
+                        },
                       ),
                     ],
                   );

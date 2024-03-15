@@ -214,7 +214,7 @@ class _ClassCellState extends State<ClassCell> {
     // モーダルの戻り値は '授業名,教室名,カラーコード' の文字列
     final returnContents = await showDialog<String>(
       context: context,
-      builder: (BuildContext context) =>  ClassEditDialog(key: classEditDialogKey),
+      builder: (BuildContext context) =>  ClassEditDialog(key: classEditDialogKey, className: className,),
     );
 
 

@@ -36,6 +36,15 @@ class AllTodoListNotifier extends _$AllTodoListNotifier {
     saveTodo();
   }
 
+  /// 該当する授業のTodoを全て削除するメソッド
+  Future removeAllTodoByClassName(String className) async{
+    if (state.asData == null) await loadTodo();
+
+    // 削除するTodoのindexを取得 (idで比較)
+    state.asData!.value.removeWhere((todoInList) => todoInList.className == className);
+    saveTodo();
+  }
+
   /// Todoを更新するメソッド
   Future updateTodo(Todo oldTodo, Todo newTodo) async{
     // 更新するTodoのindexを取得 (idで比較)
