@@ -302,7 +302,7 @@ class _ClassOptionDialogState extends State<ClassOptionDialog> {
               null;
             }
           },
-          child: Text('保存',
+          child: Text('追加',
               style: TextStyle(
                   color: isAllFilled
                       ? const Color.fromARGB(255, 99, 110, 184)

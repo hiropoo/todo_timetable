@@ -152,7 +152,24 @@ class _TodoTaskTileState extends State<TodoTaskTile> {
                       style: const TextStyle(color: Color(0xFF666666)))
                 else if (diffTime.inMinutes > 0)
                   Text("残り${diffTime.inMinutes}分",
-                      style: const TextStyle(color: Color(0xFF666666))),
+                      style: const TextStyle(color: Color(0xFF666666)))
+                else if (diffTime.inMinutes <= 0 &&
+                    diffTime.inHours == 0 &&
+                    diffTime.inDays == 0)
+                  Text("期限超過${diffTime.inMinutes.abs()}分",
+                      style: const TextStyle(
+                        color: Colors.red,
+                      ))
+                else if (diffTime.inHours <= 0 && diffTime.inDays == 0)
+                  Text("期限超過${diffTime.inHours.abs()}時間",
+                      style: const TextStyle(
+                        color: Colors.red,
+                      ))
+                else if (diffTime.inDays <= 0)
+                  Text("期限超過${diffTime.inDays.abs()}日",
+                      style: const TextStyle(
+                        color: Colors.red,
+                      )),
                 const SizedBox(
                   width: 20,
                 ),

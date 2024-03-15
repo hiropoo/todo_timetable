@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:todo_timetable/all_todo_page.dart';
 import 'package:todo_timetable/router.dart';
@@ -7,7 +9,7 @@ import 'package:todo_timetable/time_table.dart';
 void main() {
   // debugPaintSizeEnabled = true;
 
-  initializeDateFormatting('ja_JP').then((_) => runApp(const MyApp())); // 日本でローカライズ
+  initializeDateFormatting('ja_JP').then((_) => runApp(const ProviderScope(child: MyApp()))); // 日本でローカライズ
 }
 
 class MyApp extends StatelessWidget {
@@ -47,7 +49,7 @@ class _AppHomePageState extends State<AppHomePage> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     const TimeTable(),
-    const AllTodoPage(className: "すべてのTodo", color: Color.fromARGB(255, 130, 144, 237)),   // 仮
+     AllTodoPage(),
   ];
 
   //Iconクリック時の処理

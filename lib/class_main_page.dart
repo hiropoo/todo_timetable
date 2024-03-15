@@ -4,16 +4,18 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:todo_timetable/all_todo_list.dart';
 import 'package:todo_timetable/todo.dart';
 import 'package:todo_timetable/todo_add_page.dart';
 import 'package:todo_timetable/todo_edit_page.dart';
 import 'package:todo_timetable/todo_task_tile.dart';
 
-class ClassMainPage extends StatefulWidget {
+class ClassMainPage extends ConsumerStatefulWidget {
   final String className; // 授業名
   final Color color; // 画面の色
 
@@ -21,10 +23,10 @@ class ClassMainPage extends StatefulWidget {
       {super.key, required this.className, required this.color});
 
   @override
-  State<ClassMainPage> createState() => _ClassMainPageState();
+  ClassMainPageState createState() => ClassMainPageState();
 }
 
-class _ClassMainPageState extends State<ClassMainPage> {
+class ClassMainPageState extends ConsumerState<ClassMainPage> {
   // ignore: unused_field
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -32,7 +34,7 @@ class _ClassMainPageState extends State<ClassMainPage> {
   bool _isVisible = true;
   final List<Todo> _todoList = []; // Todoリスト
   // タスクIDリスト (static にすることで教科を跨いでID情報を共有)
-  static final List<String> todoIdList = []; 
+  static final List<String> todoIdList = [];
 
   Map<DateTime?, List<String>> todoEvents = {}; // カレンダーのイベント(TodoのIDを保存)
 
@@ -46,6 +48,7 @@ class _ClassMainPageState extends State<ClassMainPage> {
     // todoEventsを更新する際に_todoListが必要なため、
     // loadTodo()の後にloadTodoEvents()を呼び出す
     loadTodo().then((value) {
+      sortTodoByDeadline();
       loadTodoEvents();
     });
   }
@@ -100,8 +103,12 @@ class _ClassMainPageState extends State<ClassMainPage> {
         '${widget.className}_todoList', todoListJson); // todoListを保存
 
     setState(() {}); // 画面を更新
+  }
 
-    print('todoListを保存しました. todoList: $todoListJson'); // デバッグ用
+  /// todoListをTodoのリストを残り時間でソートするメソッド
+  void sortTodoByDeadline() {
+    _todoList.sort((a, b) => a.deadline.compareTo(b.deadline));
+    saveTodo();
   }
 
   // カレンダーの日付のテキストカラーを変えるメソッド(土: 青, 日: 赤, 他: 黒)
@@ -164,6 +171,11 @@ class _ClassMainPageState extends State<ClassMainPage> {
                 // 編集前のoldTodoと編集後のnewTodoを引数に取る
                 // oldTodoは削除し、newTodoは追加の処理を行う
                 todoWasEdited: (oldTodo, newTodo) async {
+                  // RiverpodでallTodoListの状態を更新
+                  final notifier =
+                      ref.read(allTodoListNotifierProvider.notifier);
+                  notifier.updateTodo(oldTodo, newTodo);
+
                   _todoList.remove(oldTodo);
                   saveTodo();
                   // カレンダーのイベントからも削除
@@ -196,6 +208,7 @@ class _ClassMainPageState extends State<ClassMainPage> {
 
                   // _todoListを更新してカレンダーのイベントを更新
                   loadTodo().then((value) {
+                    sortTodoByDeadline();
                     loadTodoEvents();
                   });
                 },
@@ -208,10 +221,15 @@ class _ClassMainPageState extends State<ClassMainPage> {
                 todoIdList: todoIdList,
 
                 // TodoAddPageからTodoが追加された場合の処理
-                todoWasAdded: (todo) async {
+                todoWasAdded: (todo) {
+                  // RiverpodでallTodoListの状態を更新
+                  final notifier =
+                      ref.read(allTodoListNotifierProvider.notifier);
+                  notifier.addTodo(todo);
+
                   // Todoリストに追加してローカルに保存
                   _todoList.add(todo);
-                  await saveTodo();
+                  saveTodo();
 
                   // カレンダーのイベントに追加
                   // Map todoEventsのkeyはDateTime.Utc()でない実装できないため変換を行っている(toUTC()では実装不可)
@@ -225,9 +243,10 @@ class _ClassMainPageState extends State<ClassMainPage> {
                   } else {
                     todoEvents[utcDate]?.add(todo.content);
                   }
-                  
+
                   // Todoが追加された場合は_todoListを更新してカレンダーのイベントを更新
                   loadTodo().then((value) {
+                    sortTodoByDeadline();
                     loadTodoEvents();
                   });
                 },
@@ -379,6 +398,11 @@ class _ClassMainPageState extends State<ClassMainPage> {
 
                     // Todoが削除された時の処理
                     todoWasDeleted: (todo) {
+                      // RiverpodでallTodoListの状態を更新
+                      final notifier =
+                          ref.read(allTodoListNotifierProvider.notifier);
+                      notifier.removeTodo(todo);
+
                       _todoList.remove(todo);
                       saveTodo();
                       // カレンダーのイベントからも削除
@@ -394,6 +418,11 @@ class _ClassMainPageState extends State<ClassMainPage> {
 
                     // Todoのタスクのチェックボックスが変更された場合の処理
                     todoWasTapped: (todo) {
+                      // RiverpodでallTodoListの状態を更新
+                      final notifier =
+                          ref.read(allTodoListNotifierProvider.notifier);
+                      notifier.updateIsDone(todo);
+
                       // Todoリストの該当するTodoのisDoneを更新
                       _todoList[_todoList.indexOf(todo)].isDone = !todo.isDone;
                       saveTodo();
