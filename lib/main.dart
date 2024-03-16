@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:todo_timetable/all_todo_page.dart';
@@ -15,18 +14,13 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'todo&timeTable',
-      theme: ThemeData(
-        primaryColor: const Color.fromARGB(255, 99, 110, 184)
-      ),
-      darkTheme: ThemeData(
-        primaryColor: Colors.green,
-        brightness: Brightness.dark,
-      ),
       routerDelegate: router.routerDelegate,
       routeInformationParser: router.routeInformationParser,
       routeInformationProvider: router.routeInformationProvider,

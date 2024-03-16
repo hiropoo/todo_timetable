@@ -126,6 +126,8 @@ class ClassMainPageState extends ConsumerState<ClassMainPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isKeyboardShown = 0 < MediaQuery.of(context).viewInsets.bottom;
+
     todoEditKey = GlobalObjectKey<TodoEditPageState>(context);
     return Scaffold(
       appBar: AppBar(
@@ -145,15 +147,16 @@ class ClassMainPageState extends ConsumerState<ClassMainPage> {
         maxHeight: MediaQuery.of(context).size.height * 0.3,
 
         // fab がスライドアップパネルに重ならないようにするための設定
-        onPanelSlide: (position) {
+        onPanelSlide: (position) async{
           if (_panelController.isPanelOpen) {
             setState(() {
               _isVisible = false;
             });
           } else if (_panelController.isPanelClosed) {
+              FocusScope.of(context).unfocus();
+            
             setState(() {
               _isVisible = true;
-              FocusScope.of(context).unfocus();
             });
           }
         },
@@ -256,7 +259,7 @@ class ClassMainPageState extends ConsumerState<ClassMainPage> {
               ),
       ),
       floatingActionButton: Visibility(
-        visible: _isVisible,
+        visible: !isKeyboardShown && _isVisible,
         child: Container(
           margin: const EdgeInsets.only(right: 25),
           child: FloatingActionButton(
