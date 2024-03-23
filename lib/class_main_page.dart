@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,7 +32,8 @@ class ClassMainPageState extends ConsumerState<ClassMainPage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   final PanelController _panelController = PanelController();
-  bool _isVisible = true;
+  bool _addButtonIsVisible = true;
+  bool _removeButtonIsVisible = false;
   final List<Todo> _todoList = []; // Todoリスト
   // タスクIDリスト (static にすることで教科を跨いでID情報を共有)
   static final List<String> todoIdList = [];
@@ -147,16 +149,16 @@ class ClassMainPageState extends ConsumerState<ClassMainPage> {
         maxHeight: MediaQuery.of(context).size.height * 0.3,
 
         // fab がスライドアップパネルに重ならないようにするための設定
-        onPanelSlide: (position) async{
+        onPanelSlide: (position) async {
           if (_panelController.isPanelOpen) {
             setState(() {
-              _isVisible = false;
+              _addButtonIsVisible = false;
             });
           } else if (_panelController.isPanelClosed) {
-              FocusScope.of(context).unfocus();
-            
+            FocusScope.of(context).unfocus();
+
             setState(() {
-              _isVisible = true;
+              _addButtonIsVisible = true;
             });
           }
         },
@@ -258,25 +260,125 @@ class ClassMainPageState extends ConsumerState<ClassMainPage> {
                 },
               ),
       ),
-      floatingActionButton: Visibility(
-        visible: !isKeyboardShown && _isVisible,
-        child: Container(
-          margin: const EdgeInsets.only(right: 25),
-          child: FloatingActionButton(
-            backgroundColor: widget.color,
-            // floatingActionButtonが押された場合はスライドアップパネルを表示する
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              _panelController.open();
-              setState(() {
-                _isEditing = false;
-                _isVisible = false;
-              });
-            },
-            shape: const CircleBorder(),
-            child: const Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // 完了済みのTodoの削除ボタン
+          Visibility(
+            visible: !isKeyboardShown &&
+                _addButtonIsVisible &&
+                _removeButtonIsVisible,
+            child: Container(
+              margin: const EdgeInsets.only(right: 25),
+              child: FloatingActionButton(
+                backgroundColor: Colors.grey[350],
+                // floatingActionButtonが押された場合はスライドアップパネルを表示する
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return CupertinoAlertDialog(
+                          title: const Text("完了したTodoを削除しますか？"),
+                          content: const Text("この処理は取り消せません"),
+                          actions: [
+                            CupertinoDialogAction(
+                              isDestructiveAction: true,
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(color: Colors.blue[600]),
+                              ),
+                            ),
+                            CupertinoDialogAction(
+                              child: const Text(
+                                'OK',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop(); // 現在のダイアログを閉じる
+                                _removeButtonIsVisible = false;
+
+                                // 完了済みのTodoを削除
+                                for (var todo in _todoList) {
+                                  if (todo.isDone) {
+                                    // RiverpodでallTodoListの状態を更新
+                                    final notifier = ref.read(
+                                        allTodoListNotifierProvider.notifier);
+                                    notifier.removeTodo(todo);
+
+                                    // カレンダーのイベントからも削除
+                                    DateTime utcDate = todo.deadline.toUtc();
+                                    int utcYear = utcDate.year;
+                                    int utcMonth = utcDate.month;
+                                    int utcDay = utcDate.day;
+                                    utcDate =
+                                        DateTime.utc(utcYear, utcMonth, utcDay);
+                                    todoEvents[utcDate]?.remove(todo.content);
+                                    // _todoListから削除
+                                    _todoList.remove(todo);
+                                  }
+                                }
+                                
+                                saveTodo();
+                              },
+                            ),
+                          ],
+                        );
+                      });
+                },
+                shape: const CircleBorder(),
+                child: const Icon(Icons.delete),
+              ),
+            ),
           ),
-        ),
+
+          const SizedBox(
+            height: 17,
+          ),
+
+          Visibility(
+            visible: !isKeyboardShown && _addButtonIsVisible,
+            child: GestureDetector(
+              onLongPress: () {
+                HapticFeedback.heavyImpact();
+                setState(() {
+                  _removeButtonIsVisible = true;
+                });
+              },
+              child: Container(
+                margin: const EdgeInsets.only(right: 25),
+                child: FloatingActionButton(
+                  backgroundColor: widget.color,
+                  // floatingActionButtonが押された場合はスライドアップパネルを表示する
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+
+                    if (_removeButtonIsVisible) {
+                      setState(() {
+                        _removeButtonIsVisible = false;
+                      });
+                    } else {
+                      _panelController.open();
+                      setState(() {
+                        _isEditing = false;
+                        _addButtonIsVisible = false;
+                      });
+                    }
+                  },
+                  shape: const CircleBorder(),
+
+                  child: AnimatedRotation(
+                    duration:
+                        const Duration(milliseconds: 200), // アニメーションの時間を設定
+                    turns: _removeButtonIsVisible ? 1 / 8 : 0, // 回転の度合いを設定
+                    child: const Icon(Icons.add),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -335,8 +437,7 @@ class ClassMainPageState extends ConsumerState<ClassMainPage> {
                   int index = _todoList.indexWhere((todo) => todo.id == todoId);
                   if (index != -1) {
                     if ((!_todoList[index].isDone &&
-                        _todoList[index].deadline
-                            .isBefore(DateTime.now()))) {
+                        _todoList[index].deadline.isBefore(DateTime.now()))) {
                       markers.add(const Text(
                         '●',
                         style: TextStyle(
@@ -344,8 +445,7 @@ class ClassMainPageState extends ConsumerState<ClassMainPage> {
                           color: Colors.red,
                         ),
                       ));
-                    } 
-                    else if (_todoList[index].isDone) {
+                    } else if (_todoList[index].isDone) {
                       markers.add(Text(
                         '●',
                         style: TextStyle(
@@ -449,7 +549,7 @@ class ClassMainPageState extends ConsumerState<ClassMainPage> {
                     todoWasLongPressed: (todo) async {
                       setState(() {
                         _isEditing = true;
-                        _isVisible = false;
+                        _addButtonIsVisible = false;
                       });
 
                       // keyを取得するために少し待機
